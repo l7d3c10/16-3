@@ -1,21 +1,43 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { 
   View, Text, StyleSheet, SafeAreaView, TextInput, 
   ScrollView, Image, TouchableOpacity 
 } from 'react-native';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 
+// Import dữ liệu từ file data.js (Điều chỉnh lại đường dẫn cho đúng với project của bạn)
+import { foodData } from './data'; 
+
 export default function HomeScreen() {
+  // 1. Tạo state để lưu từ khóa tìm kiếm và danh sách hiển thị
+  const [searchText, setSearchText] = useState('');
+  const [filteredData, setFilteredData] = useState(foodData); // Khởi tạo hiển thị toàn bộ data
+
+  // 2. Hàm xử lý logic tìm kiếm
+  const handleSearch = (text) => {
+    setSearchText(text); // Cập nhật chữ trong ô input
+    
+    // Nếu có chữ thì lọc data, không có thì trả về mảng gốc
+    if (text) {
+      const newData = foodData.filter(item => {
+        // Chuyển cả tên món ăn và từ khóa về chữ hoa để so sánh không phân biệt hoa/thường
+        const itemData = item.name ? item.name.toUpperCase() : ''.toUpperCase();
+        const textData = text.toUpperCase();
+        return itemData.indexOf(textData) > -1;
+      });
+      setFilteredData(newData);
+    } else {
+      setFilteredData(foodData);
+    }
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
         
-        {/* Header Section */}
+        {/* Header Section (Giữ nguyên) */}
         <View style={styles.header}>
-          <Image 
-            source={{uri: 'https://i.pravatar.cc/150?img=11'}} 
-            style={styles.avatar} 
-          />
+          <Image source={{uri: 'https://i.pravatar.cc/150?img=11'}} style={styles.avatar} />
           <View style={styles.locationContainer}>
             <Text style={styles.locationLabel}>Your Location</Text>
             <View style={{flexDirection: 'row', alignItems: 'center'}}>
@@ -28,99 +50,89 @@ export default function HomeScreen() {
           </TouchableOpacity>
         </View>
 
-        {/* Search Bar */}
+        {/* 3. Search Bar đã được gắn state và sự kiện onChangeText */}
         <View style={styles.searchContainer}>
           <Ionicons name="search-outline" size={20} color="#FFF" style={styles.searchIcon} />
           <TextInput 
             placeholder="Search your food" 
             placeholderTextColor="rgba(255,255,255,0.7)"
             style={styles.searchInput} 
+            value={searchText}
+            onChangeText={(text) => handleSearch(text)} // Gọi hàm tìm kiếm mỗi khi gõ
           />
         </View>
 
-        {/* Categories */}
+        {/* Categories (Giữ nguyên) */}
         <View style={styles.categoriesWrapper}>
           <TouchableOpacity style={[styles.categoryItem, styles.categoryActive]}>
             <Ionicons name="pizza-outline" size={32} color="white" />
             <Text style={[styles.categoryText, {color: 'white'}]}>PIZZA</Text>
           </TouchableOpacity>
-          
           <TouchableOpacity style={styles.categoryItem}>
             <MaterialCommunityIcons name="hamburger" size={32} color="#1A1A1A" />
             <Text style={styles.categoryText}>BURGER</Text>
           </TouchableOpacity>
-
           <TouchableOpacity style={styles.categoryItem}>
             <Ionicons name="wine-outline" size={32} color="#1A1A1A" />
             <Text style={styles.categoryText}>DRINK</Text>
           </TouchableOpacity>
-
           <TouchableOpacity style={styles.categoryItem}>
             <MaterialCommunityIcons name="rice" size={32} color="#1A1A1A" />
             <Text style={styles.categoryText}>RICE</Text>
           </TouchableOpacity>
         </View>
 
-        {/* Promo Banner */}
+        {/* Promo Banner (Giữ nguyên) */}
         <View style={styles.promoBanner}>
           <View style={styles.promoContent}>
             <Text style={styles.promoTitle}>BURGER</Text>
             <Text style={styles.promoSubtitle}>Today's Hot offer</Text>
-            
             <View style={styles.promoRating}>
-              {/* Overlapping Avatars */}
               <View style={styles.avatarsContainer}>
                 <Image source={{uri: 'https://i.pravatar.cc/100?img=5'}} style={styles.avatarSmall} />
                 <Image source={{uri: 'https://i.pravatar.cc/100?img=11'}} style={[styles.avatarSmall, styles.avatarOverlap]} />
                 <Image source={{uri: 'https://i.pravatar.cc/100?img=8'}} style={[styles.avatarSmall, styles.avatarOverlap]} />
               </View>
-              
               <Ionicons name="star" size={18} color="#FFD804" style={{marginLeft: 8}} />
               <Text style={styles.promoRatingText}>4.9 (3k+ Rating)</Text>
             </View>
           </View>
-
           <View style={styles.promoRight}>
             <View style={styles.badgeDiscount}>
               <Text style={styles.badgeText}>10%</Text>
               <Text style={styles.badgeText}>OFF</Text>
             </View>
-            <Image 
-              source={{uri: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?q=80&w=400&auto=format&fit=crop'}} 
-              style={styles.promoImage} 
-            />
+            <Image source={{uri: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?q=80&w=400&auto=format&fit=crop'}} style={styles.promoImage} />
           </View>
         </View>
 
-
-
-        {/* Dots Pagination Placeholder */}
-        <View style={styles.dotsContainer}>
-          <View style={styles.dot} />
-          <View style={styles.dot} />
-          <View style={[styles.dot, styles.dotActive]} />
-        </View>
-
-        {/* Popular Items */}
+        {/* Popular Items Header */}
         <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Popular Items</Text>
+          <Text style={styles.sectionTitle}>
+             {/* Đổi tiêu đề nếu người dùng đang tìm kiếm */}
+             {searchText.length > 0 ? 'Search Results' : 'Popular Items'}
+          </Text>
           <TouchableOpacity>
             <Text style={styles.viewAllText}>View All</Text>
           </TouchableOpacity>
         </View>
 
+        {/* 4. Render mảng dữ liệu đã lọc (filteredData) bằng hàm map() */}
         <View style={styles.popularContainer}>
-          <View style={styles.popularCard}>
-            <Image source={{uri: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?q=80&w=300&auto=format&fit=crop'}} style={styles.popularImage} />
-            <Text style={styles.popularTitle}>BURGER</Text>
-            <Text style={styles.popularSubtitle}>30 min | 200 sell</Text>
-          </View>
-
-          <View style={styles.popularCard}>
-            <Image source={{uri: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?q=80&w=300&auto=format&fit=crop'}} style={styles.popularImage} />
-            <Text style={styles.popularTitle}>PIZZA</Text>
-            <Text style={styles.popularSubtitle}>30 min | 200 sell</Text>
-          </View>
+          {filteredData.length > 0 ? (
+            filteredData.map((item) => (
+              <View key={item.id} style={styles.popularCard}>
+                <Image source={{uri: item.image}} style={styles.popularImage} />
+                <Text style={styles.popularTitle}>{item.name}</Text>
+                <Text style={styles.popularSubtitle}>{item.time} | {item.sell}</Text>
+              </View>
+            ))
+          ) : (
+            // Hiển thị dòng chữ nếu tìm không thấy món nào
+            <Text style={{textAlign: 'center', width: '100%', color: '#818181', marginTop: 20}}>
+              Không tìm thấy món ăn nào.
+            </Text>
+          )}
         </View>
 
       </ScrollView>
@@ -241,8 +253,15 @@ const styles = StyleSheet.create({
   sectionTitle: { fontSize: 18, fontWeight: '600', color: '#242424' },
   viewAllText: { fontSize: 13, color: '#606060', fontWeight: '600' },
 
-  popularContainer: { flexDirection: 'row', justifyContent: 'space-between' },
-  popularCard: { width: '48%' },
+  popularContainer: { 
+    flexDirection: 'row', 
+    justifyContent: 'space-between',
+    flexWrap: 'wrap', // Thêm thuộc tính này để card tự động rớt dòng nếu nhiều hơn 2 món
+  },
+  popularCard: { 
+    width: '48%',
+    marginBottom: 20 // Thêm margin bottom để các dòng cách nhau ra
+  },
   popularImage: { width: '100%', height: 120, borderRadius: 12 },
   popularTitle: { fontSize: 16, fontWeight: '600', color: '#242424', marginTop: 10, textAlign: 'center' },
   popularSubtitle: { fontSize: 10, color: '#818181', textAlign: 'center', marginTop: 4 },
